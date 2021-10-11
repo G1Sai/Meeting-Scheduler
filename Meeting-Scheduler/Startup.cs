@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -28,22 +30,20 @@ namespace Meeting_Scheduler
             //Runs a Background service "Util.UserUpdate" that updates the List of Users variable "users" every one minute. 
             services.AddHostedService<Util.UserUpdate>();
             services.AddControllers();
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Meeting_Scheduler", Version = "v1" });
-            });
+            
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
+            app.UseExceptionHandler("/error");
+            //CustomException Handler that sends a custom string according to the content of the exception raised.
+            app.UseExceptionHandler(c => c.Run(async context =>
             {
-                app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Meeting_Scheduler v1"));
-            }          
-
-            app.UseHttpsRedirection();
+                CustomException exception = (CustomException)context.Features.Get<IExceptionHandlerPathFeature>()
+              .Error;
+                var response = new { error = exception.Content, solution = exception.Solution };
+                await context.Response.WriteAsJsonAsync(response);
+            }));
 
             app.UseRouting();
 

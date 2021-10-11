@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,24 +8,34 @@ using System.Threading.Tasks;
 
 namespace Meeting_Scheduler.Util
 {
-    //Background Service to update the "Util.users" variable periodically.
+    //Summary: Background Service to update the "Util.users" variable periodically.
     public class UserUpdate : IHostedService, IDisposable
     {
         private Timer _timer;
 
         public Task StartAsync(CancellationToken stoppingToken)
-        {         
+        {
             //Update frequency can be changed here.
             _timer = new Timer(Readfile, null, TimeSpan.Zero,
                 TimeSpan.FromMinutes(1));
             return Task.CompletedTask;
         }
 
+        //
+        // Summary:
+        //     Reads the file and creates a list of User objects containing all user information.
+        //
+        // Parameters:
+        //   fil:
+        //      File Name containing meeting and employee information.
+        //
+        // Returns:
+        //      A list of User objects containing information of all users.
         public void Readfile(object state)
         {
             List<User> users = new List<User>();
             //User file name can be changed here.
-            using (System.IO.StreamReader file = new System.IO.StreamReader(@"Static/TextFile.txt"))
+            using (System.IO.StreamReader file = new System.IO.StreamReader(@"Static/freebusy.txt"))
             {
                 DateTime d1;
                 DateTime d2;
